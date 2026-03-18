@@ -5,75 +5,77 @@ interface Props {
   dispatch: React.Dispatch<any>;
 }
 
+interface Errors {
+  date: string;
+  time: string;
+  guests: string;
+  occasion: string;
+}
+
 export default function BookingForm({ availableTimes, dispatch }: Props) {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("17:00");
   const [guests, setGuests] = useState(1);
-  const [occasion, setOccasion] = useState("Birthday");
+  const [occasion, setOccasion] = useState("");
 
-  // Validation state
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<Errors>({
     date: "",
     time: "",
     guests: "",
     occasion: "",
   });
 
+  // Validate all fields
+  const validate = (): boolean => {
+    const newErrors: Errors = {
+      date: "",
+      time: "",
+      guests: "",
+      occasion: "",
+    };
+
+    let valid = true;
+
+    // Date validation (no past dates)
+    if (!date) {
+      newErrors.date = "Please select a date.";
+      valid = false;
+    } else {
+      const today = new Date().toISOString().split("T")[0];
+      if (date < today) {
+        newErrors.date = "Date cannot be in the past.";
+        valid = false;
+      }
+    }
+
+    // Guests validation
+    if (guests < 1 || guests > 10) {
+      newErrors.guests = "Guests must be between 1 and 10.";
+      valid = false;
+    }
+
+    // Occasion validation
+    if (!occasion) {
+      newErrors.occasion = "Please select an occasion.";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;
     setDate(selectedDate);
 
     dispatch({ type: "UPDATE_TIMES", date: selectedDate });
-    if (!selectedDate) {
-      setErrors((prev) => ({ ...prev, date: "Please select a date." }));
-    } else {
-      setErrors((prev) => ({ ...prev, date: "" }));
-    }
-  };
-
-  const handleGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value);
-    setGuests(value);
-
-    if (value < 1 || value > 10) {
-      setErrors((prev) => ({
-        ...prev,
-        guests: "Guests must be between 1 and 10.",
-      }));
-    } else {
-      setErrors((prev) => ({ ...prev, guests: "" }));
-    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Check all validations
-    let formValid = true;
-    const newErrors = { date: "", time: "", guests: "", occasion: "" };
+    if (!validate()) return;
 
-    if (!date) {
-      newErrors.date = "Please select a date.";
-      formValid = false;
-    }
-    if (!time) {
-      newErrors.time = "Please select a time.";
-      formValid = false;
-    }
-    if (!guests || guests < 1 || guests > 10) {
-      newErrors.guests = "Guests must be between 1 and 10.";
-      formValid = false;
-    }
-    if (!occasion) {
-      newErrors.occasion = "Please select an occasion.";
-      formValid = false;
-    }
-
-    setErrors(newErrors);
-
-    if (!formValid) return;
-
-    // Submit successful
     alert(
       `Reservation submitted!\nDate: ${date}\nTime: ${time}\nGuests: ${guests}\nOccasion: ${occasion}`
     );
@@ -92,8 +94,14 @@ export default function BookingForm({ availableTimes, dispatch }: Props) {
           className={`form-control ${errors.date ? "is-invalid" : ""}`}
           value={date}
           onChange={handleDateChange}
+          aria-invalid={!!errors.date}
+          aria-describedby="date-error"
         />
-        {errors.date && <div className="invalid-feedback">{errors.date}</div>}
+        {errors.date && (
+          <div id="date-error" className="invalid-feedback">
+            {errors.date}
+          </div>
+        )}
       </div>
 
       {/* Time */}
@@ -103,15 +111,16 @@ export default function BookingForm({ availableTimes, dispatch }: Props) {
         </label>
         <select
           id="res-time"
-          className={`form-select ${errors.time ? "is-invalid" : ""}`}
+          className="form-select"
           value={time}
           onChange={(e) => setTime(e.target.value)}
         >
-          {availableTimes.map((t) => (
-            <option key={t}>{t}</option>
-          ))}
+          {availableTimes.length > 0 ? (
+            availableTimes.map((t) => <option key={t}>{t}</option>)
+          ) : (
+            <option>No times available</option>
+          )}
         </select>
-        {errors.time && <div className="invalid-feedback">{errors.time}</div>}
       </div>
 
       {/* Guests */}
@@ -126,10 +135,14 @@ export default function BookingForm({ availableTimes, dispatch }: Props) {
           min={1}
           max={10}
           value={guests}
-          onChange={handleGuestsChange}
+          onChange={(e) => setGuests(Number(e.target.value))}
+          aria-invalid={!!errors.guests}
+          aria-describedby="guests-error"
         />
         {errors.guests && (
-          <div className="invalid-feedback">{errors.guests}</div>
+          <div id="guests-error" className="invalid-feedback">
+            {errors.guests}
+          </div>
         )}
       </div>
 
@@ -143,13 +156,17 @@ export default function BookingForm({ availableTimes, dispatch }: Props) {
           className={`form-select ${errors.occasion ? "is-invalid" : ""}`}
           value={occasion}
           onChange={(e) => setOccasion(e.target.value)}
+          aria-invalid={!!errors.occasion}
+          aria-describedby="occasion-error"
         >
           <option value="">Select an occasion</option>
           <option>Birthday</option>
           <option>Anniversary</option>
         </select>
         {errors.occasion && (
-          <div className="invalid-feedback">{errors.occasion}</div>
+          <div id="occasion-error" className="invalid-feedback">
+            {errors.occasion}
+          </div>
         )}
       </div>
 
