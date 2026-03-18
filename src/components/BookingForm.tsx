@@ -170,7 +170,7 @@ export default function BookingForm({ availableTimes, dispatch }: Props) {
         )}
       </div>
 
-      <button type="submit" className="btn btn-primary w-100">
+      <button type="submit" className="btn btn-warning w-100">
         Make Your Reservation
       </button>
     </form>
