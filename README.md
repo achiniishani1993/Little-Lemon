@@ -1,4 +1,4 @@
-# Little Lemon Booking App
+# Little Lemon website with booking table
 
 ## Overview
 A React + TypeScript web application for reserving tables at Little Lemon restaurant.
@@ -40,3 +40,11 @@ A React + TypeScript web application for reserving tables at Little Lemon restau
 ## Future Improvements
 - API integration for available times
 - Backend booking system
+
+## Screenshots
+
+### 🏠 Home Page
+![Home](/src/assets/homepage.png)
+
+### 📅 Booking Page
+![Booking](/src/assets/booking.png)
