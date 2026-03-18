@@ -1,8 +1,6 @@
 
-function App() {
-  return (
-    <div>App</div>
-  )
-}
+import Main from "./main";
 
-export default App
+export default function App() {
+  return <Main />;
+}
